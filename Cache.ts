@@ -188,7 +188,7 @@ class Cache {
             if (!data.expired) {
                 ret++;
             } else if (options.invalidateExpired) {
-                this.invalidateCache(null, { full: false })
+                this.invalidateCache(key, { full: false })
             }
         });
 
