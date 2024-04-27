@@ -2,7 +2,7 @@
  * Copyright (c) Ritam Choudhuri 2024.
  */
 
-import type {CacheData, GetOptions, InvalidateCacheOptions, Options, SetOptions} from './types';
+import type { CacheData, GetOptions, InvalidateCacheOptions, Options, SetOptions, CountOptions } from './types';
 
 class Cache {
     private readonly _cache: Map<string, CacheData>;
@@ -13,12 +13,12 @@ class Cache {
         this._cache = new Map();
 
         setTimeout(() => {
-            this.invalidateCache( null, { full: false } );
+            this.invalidateCache(null, { full: false });
         }, 10 * 1000); // Deletes expired keys every 10 seconds
 
         if (this._options.globalExpiry) {
             setInterval(() => {
-                this.invalidateCache( null, { full: true } );
+                this.invalidateCache(null, { full: true });
             }, this._options.globalExpiry);
         }
 
@@ -134,7 +134,7 @@ class Cache {
             this.remove(key);
             cachedData = this._cache.get(key);
 
-            if ( !( (options?.includeExpired) && this._options.keepExpired ) ) {
+            if (!((options?.includeExpired) && this._options.keepExpired)) {
                 return Cache.throwErr('Key not found in cache');
             }
         }
@@ -145,6 +145,22 @@ class Cache {
             return cachedData?.data;
         }
     }
+
+    getOrElse(key: string, consumer: Function) {
+        let cachedData: CacheData | undefined = this._cache.get(key);
+
+        if (!cachedData || this.isExpired(key)) {
+
+            let value = consumer();
+
+            this.set(key, value)
+
+            return value;
+        }
+
+        return cachedData?.data;
+    }
+
 
     delete(key: string) {
         if (!this._cache.has(key)) return Cache.throwErr('Key not found in cache')
@@ -165,12 +181,14 @@ class Cache {
     }
 
     // Returns the number of non-expired keys in the cache
-    get count() {
+    get count(options: CountOptions = { invalidateExpired: false }) {
         let ret = 0;
 
         this._cache.forEach((data, key) => {
             if (!data.expired) {
                 ret++;
+            } else if (options.invalidateExpired) {
+                this.invalidateCache(key, { full: false })
             }
         });
 
