@@ -22,6 +22,10 @@ export interface GetOptions {
     includeExpired?: boolean;
 }
 
+export interface CountOptions {
+    invalidateExpired?: boolean;
+}
+
 export interface SetOptions {
     expiry?: number | null;
     force?: boolean; // If true, the cache will override existing keys.

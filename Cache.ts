@@ -2,7 +2,7 @@
  * Copyright (c) Ritam Choudhuri 2024.
  */
 
-import type { CacheData, GetOptions, InvalidateCacheOptions, Options, SetOptions } from './types';
+import type { CacheData, GetOptions, InvalidateCacheOptions, Options, SetOptions, CountOptions } from './types';
 
 class Cache {
     private readonly _cache: Map<string, CacheData>;
@@ -181,12 +181,14 @@ class Cache {
     }
 
     // Returns the number of non-expired keys in the cache
-    get count() {
+    get count(options: CountOptions = { invalidateExpired: false }) {
         let ret = 0;
 
         this._cache.forEach((data, key) => {
             if (!data.expired) {
                 ret++;
+            } else if (options.invalidateExpired) {
+                this.invalidateCache(null, { full: false })
             }
         });
 
