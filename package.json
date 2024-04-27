@@ -1,7 +1,7 @@
 {
-  "name": "smartcache",
-  "version": "1.0.0",
-  "description": "The best cache manager you can find ;)",
+  "name": "@xcyth/smartcache",
+  "version": "1.0.1",
+  "description": "SmartCache is a simple, efficient caching system implemented in TypeScript.",
   "main": "dist/index.js",
   "types": "dist/types.d.ts",
   "scripts": {

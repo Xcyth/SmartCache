@@ -11,6 +11,7 @@ class Cache {
     constructor(options: Options = {} as Options) {
         this._options = options;
         this._cache = new Map();
+
         setTimeout(() => {
             this.invalidateCache( null, { full: false } );
         }, 10 * 1000); // Deletes expired keys every 10 seconds
@@ -24,7 +25,7 @@ class Cache {
         console.log('[SmartCache Log]: Cache created');
     }
 
-    getInstance() {
+    get instance() {
         return this._cache;
     }
 
@@ -67,8 +68,11 @@ class Cache {
     private remove(key: any) {
         const cachedData = this._cache.get(key);
         if (!cachedData) return;
+
+        const newData: CacheData = { data: cachedData.data, expiry: null, expired: true };
+
         if (this._options.keepExpired) {
-            this._cache.set(key, { data: cachedData.data, expiry: null, expired: true });
+            this._cache.set(key, newData);
         } else {
             this._cache.delete(key);
             if (this._options.onRemove) {
@@ -105,41 +109,73 @@ class Cache {
         }
     }
 
-    // TODO Check if key is present in cache before setting and if safe mode is on, throw error. If force is true, overwrite the data
-    // TODO Check if cache limit is reached before setting. If true and maxEntries has a data, throw error
     set(key: string, data: any, options: SetOptions = { expiry: null, force: false }) {
         const { expiry: expiresIn, force } = options;
 
-        // if (this._cache.size >= this._options.maxEntries && !force) {
-        //     Cache.throwErr('Cache limit reached');
-        // }
+        if (this._options.safeMode && this._cache.has(key) && !force) {
+            return Cache.throwErr('Key already exists in cache. Use force option to override');
+        }
+
+        if (this._options.maxEntries && this._cache.size >= this._options.maxEntries) {
+            return Cache.throwErr('Cache limit reached');
+        }
 
         return this._cache.set(key, Cache.createCacheData(data, expiresIn));
     }
 
     get(key: string, options?: GetOptions) {
-        const cachedData: CacheData | undefined = this._cache.get(key);
+        let cachedData: CacheData | undefined = this._cache.get(key);
 
         if (!cachedData) {
             return Cache.throwErr('Key not found in cache');
         }
 
         if (this.isExpired(key)) {
-            this._cache.delete(key);
-            if (!this._options.onRemove) {
-                return undefined;
+            this.remove(key);
+            cachedData = this._cache.get(key);
+
+            if ( !( (options?.includeExpired) && this._options.keepExpired ) ) {
+                return Cache.throwErr('Key not found in cache');
             }
-            return this._options.onRemove(key, cachedData.data);
         }
 
         if (options?.raw) {
             return cachedData;
         } else {
-            return cachedData.data;
+            return cachedData?.data;
         }
     }
 
+    delete(key: string) {
+        if (!this._cache.has(key)) return Cache.throwErr('Key not found in cache')
 
+        if (this._options.safeMode) {
+            this.remove(key);
+        } else {
+            this._cache.delete(key);
+        }
+    }
+
+    clear() {
+        this._cache.clear();
+    }
+
+    get size() {
+        return this._cache.size;
+    }
+
+    // Returns the number of non-expired keys in the cache
+    get count() {
+        let ret = 0;
+
+        this._cache.forEach((data, key) => {
+            if (!data.expired) {
+                ret++;
+            }
+        });
+
+        return ret;
+    }
 }
 
 export default Cache;

@@ -19,6 +19,7 @@ export interface Options {
 
 export interface GetOptions {
     raw?: boolean;
+    includeExpired?: boolean;
 }
 
 export interface SetOptions {
