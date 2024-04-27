@@ -1,0 +1,19 @@
+# dependencies
+/node_modules
+
+# testing
+/test.ts
+
+# production
+/dist
+
+# IDE
+/.idea
+
+# misc
+.DS_Store
+.env
+.env.test
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
