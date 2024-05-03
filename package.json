@@ -1,11 +1,10 @@
 {
   "name": "@xcyth/smartcache",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "SmartCache is a simple, efficient caching system implemented in TypeScript.",
   "main": "dist/index.js",
-  "types": "dist/types.d.ts",
   "scripts": {
-    "test": "ts-node ./test.ts",
+    "test": "ts-node tests/test.ts",
     "build": "tsc"
   },
   "repository": {

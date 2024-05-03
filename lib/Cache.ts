@@ -4,7 +4,7 @@
 
 import type { CacheData, GetOptions, InvalidateCacheOptions, Options, SetOptions, CountOptions } from './types';
 
-class Cache {
+export default class Cache {
     private readonly _cache: Map<string, CacheData>;
     private _options: Options;
 
@@ -181,7 +181,7 @@ class Cache {
     }
 
     // Returns the number of non-expired keys in the cache
-    get count(options: CountOptions = { invalidateExpired: false }) {
+    count(options: CountOptions = { invalidateExpired: false }) {
         let ret = 0;
 
         this._cache.forEach((data, key) => {
@@ -195,5 +195,3 @@ class Cache {
         return ret;
     }
 }
-
-export default Cache;

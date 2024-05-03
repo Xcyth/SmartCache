@@ -2,6 +2,6 @@
  * Copyright (c) Ritam Choudhuri 2024.
  */
 
-import Cache from "./Cache";
+import Lib from './lib/Cache';
 
-export default Cache;
+export default class Cache extends Lib {}
